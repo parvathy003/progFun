@@ -13,6 +13,11 @@ product_info = {
     "fragrance": (25.0 ,"n") 
 }
 
+order_list = {
+    "Kate":[],
+    "Tom":[]
+}
+
 # Function to get user input based on prompt sent to this function
 def get_user_input(prompt):
     sys.stdout.write(prompt + ": ") 
@@ -36,17 +41,46 @@ def round_reward_points(rewardPoints):
     else: 
         return int(rewardPoints)+1
     
-def print_receipt(name,product,price,qty,rewardPoints):
+def print_receipt(name,orders):
+
+    sum =0
+    rewards =0
     print("---------------------------------------------------------")
     print("                     Receipt                             ")
     print("---------------------------------------------------------")
     print(" Name:"+ name)
-    print(" Product: "+ product)
-    print(" Unit Price: ",price," (AUD)")
-    print(" Quantity: "+qty)
+
+    for order in orders:
+        sum+= order[3]
+        rewards+=order[4]
+        print(" Product: "+ order[1])
+        print(" Unit Price: ",order[2]," (AUD)")
+        print(" Quantity: "+ str(order[0]))
     print(" ---------------------------------------------------------")
-    print(" Total cost: "+ str(price) +"(AUD)")
-    print(" Earned reward: "+ str(rewardPoints))
+    print(" Total cost: "+ str(sum) +"(AUD)")
+    print(" Earned reward: "+ str(rewards))
+
+    (sum,rewards) = apply_discounts(sum, rewards)
+    return rewards
+
+
+def apply_discounts(sum,rewards):
+    if rewards>=100:
+        sum-=10
+        rewards-=100
+    return (sum, rewards)
+def check_valid_products(products):
+    for product in products:
+        if not (product in product_info):
+            return False        
+    return True
+
+def check_prescription_required(products):
+    for product in products:
+        (price,pres) = product_info[product]
+        if pres == "y":
+            return True
+    return False
 
 def make_purchase():
     # Customer name to be entered only in alphabets
@@ -57,53 +91,64 @@ def make_purchase():
         else:
             print("Sorry,please enter a valid name.The entered name is invalid")
 
-            
+    product_list=[]
     # Product entered should always be vaild
     while True:
-        product = get_user_input("What product do you want? ")
-        if product in product_info:
+        product_list = get_user_input("What product do you want? ")
+
+        product_list= product_list.split(",")
+
+        if check_valid_products(product_list):
             break
-        else:
-            print("You have entered an invaild product name. Enter a valid product name") 
+    
+    check_prescription_required(product_list)
 
     # Check if the product requires a prescription and handle accordingly
-    if product_info[product][1] == "y":
-            prescription_answer=""
-    quantity=0
+    prescription_answer=""
+    quantity_list=[]
     while True:
-        prescription_answer = get_user_input(f"Product '{product}' requires a doctor's prescription. Do you have a prescription? (y/n)")
+        prescription_answer = get_user_input(f"One of your product requires a doctor's prescription. Do you have a prescription? (y/n)")
         if prescription_answer in ["y","n"]:
             if prescription_answer.lower() != 'y':
-                print("The product requires a prescription by doctor.Do provide a prescription for purchasing it.")
+                print("The product requires a prescription by doctor.Please provide a prescription for purchasing it.")
                 sys.exit()
             
             while True:
-                quantity = get_user_input("what quantity do you need? ")
-                if quantity.isdigit() and int(quantity) > 0:
-                    break
-                else:
-                    print("Entered invalid quantity.Enter a positive integer.")
-                    
+                quantity_list = get_user_input("what quantities do you need? ")
+                quantity_list =quantity_list.split(",")
+                flag = True
+                for quantity in quantity_list:
+                    if quantity.isdigit() and int(quantity) > 0:
+                        flag = True
+                    else:
+                        flag = False
+                        print("Entered invalid quantity.Enter a positive integer.")
+                        break
+
+                if flag:
+                    break     
             break
         else:
             print("Please enter a valid choice. Do you have a prescription (y/n)?")
 
+    order=[]
+    for i in range(len(product_list)):
+        product= product_list[i]
+        product_unit_price = product_info[product][0]
+        product_quantity = int(quantity_list[i])
+        price = calc_total_cost(product_unit_price,product_quantity) 
+        reward_points = round_reward_points(price) 
+        order.append([product_quantity,product,product_unit_price,price,reward_points])
+    
+    rewards= print_receipt(name,order)
 
-    price = calc_total_cost(product_info[product][0],int(quantity)) 
-    print("Total Cost price:" , price)
-
-    # Calculating the rewrd points earned from purchase
-
-    reward_points = round_reward_points(price) 
-    print("Reward points: ", reward_points)
-
-    print_receipt(name,product,price,quantity,reward_points)
 
     # Checks if new user or already existing user
     if( name in customers):
-        customers[name] += reward_points
+        customers[name] += rewards
+
     else:
-        customers[name] = reward_points
+        customers[name] = rewards
         print(customers)
 
 ####################################CHECK###################################################
@@ -126,10 +171,13 @@ def display_products():
         price, dr_prescription = info
         print(f"Product: {product}, Price: {price}, Doctor's Prescription Required: {'Yes' if dr_prescription == 'y' else 'No'}")
 
-def order_history():
+def order_history(orders):
     
-    
-    return ""
+    name = get_user_input("Enter the name to search up")
+    i=1 
+    for order in orders:
+        print("Order "+ str(i) + " "+ str([order[1]])+" BAAKI FORMAT")
+        i+=1
 
 def exit_program():
     sys.exit()
