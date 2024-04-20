@@ -57,10 +57,19 @@ def print_receipt(name,orders):
         print(" Quantity: "+ str(order[0]))
 
     print(" ---------------------------------------------------------")
+    current_rewards =0
+    if name in customers:    
+        current_rewards = customers[name]
+    else:
+        current_rewards = 0
+
+    (sum,current_rewards) = apply_discounts(sum, current_rewards)
+
+    if name in customers:    
+        customers[name] = current_rewards
+        
     print(" Total cost: "+ str(sum) +"(AUD)")
     print(" Earned reward: "+ str(rewards))
-
-    (sum,rewards) = apply_discounts(sum, rewards)
     return rewards
 
 
@@ -104,7 +113,6 @@ def prompt_quantities(num):
         print("HI",flag)
         if flag:
             return quantity_list     
-    return quantity_list
 
 def checkout_order(product_list,quantity_list):
     order = []
