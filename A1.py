@@ -28,10 +28,6 @@ def get_user_input(prompt):
     return sys.stdin.readline().strip()  
 
 
-def prescription_required(product, product_info):
-    product_list = product_info.get(product,(0, "n"))
-    return product_list[1] == "y"
-
 def calc_total_cost(price, qty):
     print(price, qty ,price*qty)
     return price*qty
@@ -59,6 +55,7 @@ def print_receipt(name,orders):
         print(" Product: "+ order[1])
         print(" Unit Price: ",order[2]," (AUD)")
         print(" Quantity: "+ str(order[0]))
+
     print(" ---------------------------------------------------------")
     print(" Total cost: "+ str(sum) +"(AUD)")
     print(" Earned reward: "+ str(rewards))
@@ -90,20 +87,23 @@ def prompt_quantities(num):
     while True:
         quantity_list = get_user_input("what quantities do you need? ")
         quantity_list =quantity_list.split(",")
+        flag = True
         if(len(quantity_list) == num):
-            flag = True
             for quantity in quantity_list:
+                print(quantity)
+                print(quantity.isdigit() and int(quantity) > 0)
                 if quantity.isdigit() and int(quantity) > 0:
                     flag = True
                 else:
                     flag = False
                     print("Entered invalid quantity.Enter a positive integer.")
                     break
-
-            if flag:
-                break     
         else:
             print("Invalid Quantity!")
+            flag = False
+        print("HI",flag)
+        if flag:
+            return quantity_list     
     return quantity_list
 
 def checkout_order(product_list,quantity_list):
@@ -139,23 +139,26 @@ def make_purchase():
         if check_valid_products(product_list):
             break
     
-    check_prescription_required(product_list)
     num_of_products = len(product_list)
     
     # Check if the product requires a prescription and handle accordingly
     prescription_answer=""
     quantity_list=[]
     while True:
-        prescription_answer = get_user_input(f"One of your product requires a doctor's prescription. Do you have a prescription? (y/n)")
-        if prescription_answer in ["y","n"]:
-            if prescription_answer.lower() != 'y':
-                print("The product requires a prescription by doctor.Please provide a prescription for purchasing it.")
-                sys.exit()
-            
+        if check_prescription_required(product_list):
+            prescription_answer = get_user_input(f"One of your product requires a doctor's prescription. Do you have a prescription? (y/n)")
+            if prescription_answer in ["y","n"]:
+                if prescription_answer.lower() != 'y':
+                    print("The product requires a prescription by doctor.Please provide a prescription for purchasing it.")
+                    sys.exit()
+                quantity_list = prompt_quantities(num_of_products)
+                break
+            else:
+                print("Please enter a valid choice. Do you have a prescription (y/n)?")
+        else:
+            print(num_of_products)
             quantity_list = prompt_quantities(num_of_products)
             break
-        else:
-            print("Please enter a valid choice. Do you have a prescription (y/n)?")
 
     order= checkout_order(product_list,quantity_list)
     rewards= print_receipt(name,order)
@@ -164,13 +167,10 @@ def make_purchase():
     # Checks if new user or already existing user
     if( name in customers):
         customers[name] += rewards
-
         order_list[name] += order
     else:
         customers[name] = rewards
-
         order_list[name] = order
-        print(customers)
 
 # option 2
 def add_update_product():
