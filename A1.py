@@ -37,7 +37,7 @@ def round_reward_points(rewardPoints):
     roundVal = rewardPoints- int(rewardPoints)
     print(roundVal)
     if (roundVal < 0.5):
-        return rewardPoints
+        return int(rewardPoints)
     else: 
         return int(rewardPoints)+1
     
@@ -147,17 +147,22 @@ def make_purchase():
     if( name in customers):
         customers[name] += rewards
 
+        order_list[name] += order
     else:
         customers[name] = rewards
+
+        order_list[name] = order
         print(customers)
 
-####################################CHECK###################################################
 
 def add_update_product():
     product_info_input = get_user_input("Enter product information (name price dr_prescription): ")
-    product_info_list = product_info_input.split()
-    product_name = product_info_list[0]
-    product_info[product_name] = (float(product_info_list[1]), product_info_list[2])
+
+    product_info_list = product_info_input.split(",")
+    for product in product_info_list:
+        product = product.split(" ")
+        product_name = product[0]
+        product_info[product_name] = (float(product[1]), product[2])
 
 
 def display_customers():
@@ -171,9 +176,10 @@ def display_products():
         price, dr_prescription = info
         print(f"Product: {product}, Price: {price}, Doctor's Prescription Required: {'Yes' if dr_prescription == 'y' else 'No'}")
 
-def order_history(orders):
+def order_history():
     
     name = get_user_input("Enter the name to search up")
+    orders = order_list[name]
     i=1 
     for order in orders:
         print("Order "+ str(i) + " "+ str([order[1]])+" BAAKI FORMAT")
