@@ -1,5 +1,6 @@
 import sys
 
+# ----------------------------------------------Global dictionaries ------------------------------------------------------------
 customers = {
     "Kate": 20,
     "Tom": 32
@@ -17,6 +18,8 @@ order_list = {
     "Kate":[],
     "Tom":[]
 }
+
+# ------------------------------------------------- UTILITY FUNCTIONS ---------------------------------------------------------
 
 # Function to get user input based on prompt sent to this function
 def get_user_input(prompt):
@@ -82,6 +85,41 @@ def check_prescription_required(products):
             return True
     return False
 
+def prompt_quantities(num):
+    quantity_list =[]
+    while True:
+        quantity_list = get_user_input("what quantities do you need? ")
+        quantity_list =quantity_list.split(",")
+        if(len(quantity_list) == num):
+            flag = True
+            for quantity in quantity_list:
+                if quantity.isdigit() and int(quantity) > 0:
+                    flag = True
+                else:
+                    flag = False
+                    print("Entered invalid quantity.Enter a positive integer.")
+                    break
+
+            if flag:
+                break     
+        else:
+            print("Invalid Quantity!")
+    return quantity_list
+
+def checkout_order(product_list,quantity_list):
+    order = []
+    for i in range(len(product_list)):
+        product= product_list[i]
+        product_unit_price = product_info[product][0]
+        product_quantity = int(quantity_list[i])
+        price = calc_total_cost(product_unit_price,product_quantity) 
+        reward_points = round_reward_points(price) 
+        order.append([product_quantity,product,product_unit_price,price,reward_points])
+    return order
+    
+#----------------------------------------------------MENU FUNCTIONS-------------------------------------------------------
+
+# option 1
 def make_purchase():
     # Customer name to be entered only in alphabets
     while True:
@@ -102,7 +140,8 @@ def make_purchase():
             break
     
     check_prescription_required(product_list)
-
+    num_of_products = len(product_list)
+    
     # Check if the product requires a prescription and handle accordingly
     prescription_answer=""
     quantity_list=[]
@@ -113,33 +152,12 @@ def make_purchase():
                 print("The product requires a prescription by doctor.Please provide a prescription for purchasing it.")
                 sys.exit()
             
-            while True:
-                quantity_list = get_user_input("what quantities do you need? ")
-                quantity_list =quantity_list.split(",")
-                flag = True
-                for quantity in quantity_list:
-                    if quantity.isdigit() and int(quantity) > 0:
-                        flag = True
-                    else:
-                        flag = False
-                        print("Entered invalid quantity.Enter a positive integer.")
-                        break
-
-                if flag:
-                    break     
+            quantity_list = prompt_quantities(num_of_products)
             break
         else:
             print("Please enter a valid choice. Do you have a prescription (y/n)?")
 
-    order=[]
-    for i in range(len(product_list)):
-        product= product_list[i]
-        product_unit_price = product_info[product][0]
-        product_quantity = int(quantity_list[i])
-        price = calc_total_cost(product_unit_price,product_quantity) 
-        reward_points = round_reward_points(price) 
-        order.append([product_quantity,product,product_unit_price,price,reward_points])
-    
+    order= checkout_order(product_list,quantity_list)
     rewards= print_receipt(name,order)
 
 
@@ -154,7 +172,7 @@ def make_purchase():
         order_list[name] = order
         print(customers)
 
-
+# option 2
 def add_update_product():
     product_info_input = get_user_input("Enter product information (name price dr_prescription): ")
 
@@ -164,18 +182,20 @@ def add_update_product():
         product_name = product[0]
         product_info[product_name] = (float(product[1]), product[2])
 
-
+# option 3
 def display_customers():
     print("Existing customers and their accumulated reward points:")
     for customer, reward_points in customers.items():
         print(f"{customer}: {reward_points}")
 
+# option 4
 def display_products():
     print("Existing products with their prices and prescription requirement:")
     for product, info in product_info.items():
         price, dr_prescription = info
         print(f"Product: {product}, Price: {price}, Doctor's Prescription Required: {'Yes' if dr_prescription == 'y' else 'No'}")
 
+# option 5
 def order_history():
     
     name = get_user_input("Enter the name to search up")
@@ -185,6 +205,7 @@ def order_history():
         print("Order "+ str(i) + " "+ str([order[1]])+" BAAKI FORMAT")
         i+=1
 
+# option 6
 def exit_program():
     sys.exit()
 
@@ -207,7 +228,7 @@ while True:
     print("4. Display existing products")
     print("5. Order history of a customer")
     print("6. Exit the program")
-    choice = get_user_input("Enter your choice (1-5): ")
+    choice = get_user_input("Enter your choice (1-6): ")
 
     if choice in menu_options:
         menu_options[choice]()
