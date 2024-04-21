@@ -229,6 +229,8 @@ def order_history():
         name = get_user_input("Enter the name to search up")
         if name in customers:
             break
+        else:
+            print("Enter a valid customer name")
     orders = order_list[name]
     i=1 
     for order in orders:
@@ -272,12 +274,12 @@ while True:
 # I started the assignment by understanding the requirements,which emphasised on developing a menu-driven software to manage customer purchases and product information.Implementing each item in the menu as a function increased the readability of the code.This helps in maintaining the program effectively.Introducing its own function makes it easier in future to make any changes or expand the application.
 # Functions were used to validate the data entered by user and to check for any errors.
 # I have used dictionaries in order to store customer data, product details and order history.
-# Error handling techniques were built into the code to deal with potential runtime issues.This includes detecting invalid user inputs, handling exceptions, and displaying relevant error messages.
-# I used comments and documentation throughout the code to clarify the purpose of each function, method, and variable. These comments serve as a guidance for developers, improving code readability.
+# For detecting invalid user inputs during run time, handling exceptions and to display appropriate error messages ,I did add certain error handling techniques to the code.
+# I used comments and documentation throughout the code to understand the purpose of each function, method, and variable. These comments serve as a guidance for developers, improving code readability.
 
 # Reflection
 
-# Key areas of focus included robust input validation logic, handling prescription-only medicines, accurate order processing, and an intuitive menu structure.
+# Key areas of focus included input validation logic, handling prescription-only medicines, accurate order processing, and building a menu structure.
 # The code mostly uses while loops for user input validation and menu navigation because of their ability to iterate until a certain condition is met, assuring precise input handling and program execution.This technique enables dynamic user interaction, gentle error handling, and smooth navigation through the menu. 
 
 #---------------------------------------------------------------------------------------------------------------------------
